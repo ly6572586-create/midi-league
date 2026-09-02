@@ -205,7 +205,7 @@ export default function MidiLeagueApp() {
       date: '2026-08-28'
     }
   ]);
-
+const [playerStats, setPlayerStats] = useState([]);
   useEffect(() => {
     fetchData();
   }, []);
