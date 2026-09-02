@@ -62,7 +62,6 @@ export default function MidiLeagueApp() {
         'حسن ماجد', 'يحيى مارادونا', 'عجار محمد', 'علي بلوش',
         'علي متنبك', 'محمد بخاش', 'رمزي حرملي', 'علي هادي',
         'رياض فايد', 'فؤاد محمد احمد', 'مراد عاتي'
-        // تم إزالة الاسم المكرر هنا
       ]
     }
   ]);
@@ -148,7 +147,12 @@ export default function MidiLeagueApp() {
     saveData(updatedMatches);
   }
 
-  // حساب جدول الترتيب بطريقة مختصرة وأسرع
+  // دالة جلب الشعار
+  const getTeamLogo = (teamName) => {
+    const foundTeam = teams.find((t) => t.name === teamName);
+    return foundTeam ? foundTeam.logo : '';
+  };
+
   const standings = teams
     .map((team) => {
       const result = {
@@ -276,16 +280,22 @@ export default function MidiLeagueApp() {
                 <h2 className="font-bold text-base mb-3 border-b pb-1">📅 جدول المباريات</h2>
                 {matches.map((match) => (
                   <div key={match.id} className={`p-3 mb-2 rounded shadow border text-sm ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                    <div className="flex justify-between items-center text-[10px] text-gray-400 mb-1">
+                    <div className="flex justify-between items-center text-[10px] text-gray-400 mb-2">
                       <span>المباراة #{match.id}</span>
                       <span>{match.date}</span>
                     </div>
                     <div className="flex justify-between items-center font-bold">
-                      <span>{match.homeTeam}</span>
-                      <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-xs">
+                      <div className="flex items-center gap-2 w-1/3 justify-start">
+                        <img src={getTeamLogo(match.homeTeam)} alt={match.homeTeam} className="w-7 h-7 object-contain bg-black/20 rounded p-0.5" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                        <span className="truncate text-xs">{match.homeTeam}</span>
+                      </div>
+                      <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-xs mx-1">
                         {match.played ? `${match.homeGoals} - ${match.awayGoals}` : 'VS'}
                       </span>
-                      <span>{match.awayTeam}</span>
+                      <div className="flex items-center gap-2 w-1/3 justify-end">
+                        <span className="truncate text-xs">{match.awayTeam}</span>
+                        <img src={getTeamLogo(match.awayTeam)} alt={match.awayTeam} className="w-7 h-7 object-contain bg-black/20 rounded p-0.5" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                      </div>
                     </div>
                   </div>
                 ))}
