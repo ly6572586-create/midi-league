@@ -205,7 +205,9 @@ export default function MidiLeagueApp() {
       date: '2026-08-28'
     }
   ]);
-const [playerStats, setPlayerStats] = useState([]);
+
+  const [playerStats, setPlayerStats] = useState([]);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -388,8 +390,7 @@ const [playerStats, setPlayerStats] = useState([]);
 
       return a.name.localeCompare(b.name, 'ar');
     });
-
-  return (
+    return (
     <div
       dir="rtl"
       className={
@@ -408,6 +409,246 @@ const [playerStats, setPlayerStats] = useState([]);
           />
 
           <div>
+            <h1 className="font-bold text-sm">
+              دوري ميدي للمحترفين
+            </h1>
+
+            <p className="text-[10px] text-emerald-200">
+              ملعب بني فايد 2026
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-1 bg-emerald-800 rounded text-xs px-2"
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+
+          <button
+            onClick={() => setIsAdmin(!isAdmin)}
+            className="bg-amber-500 text-gray-900 px-2 py-1 rounded font-bold text-xs"
+          >
+            ⚙️ الإدارة
+          </button>
+        </div>
+      </header>
+
+      {/* Admin Panel */}
+      {isAdmin && (
+        <div className="p-3 bg-gray-800 border-b border-gray-700 m-2 rounded">
+          <h2 className="font-bold text-sm mb-2 text-amber-400">
+            لوحة الإدارة
+          </h2>
+
+          <input
+            type="password"
+            placeholder="أدخل رمز الأمان"
+            value={adminPin}
+            onChange={(e) => setAdminPin(e.target.value)}
+            className="p-2 rounded bg-gray-900 text-white border border-gray-700 text-xs w-full mb-2"
+          />
+
+          {adminPin === 'aymanmidi' && (
+            <div className="mt-2 max-h-60 overflow-y-auto">
+              <p className="text-xs text-emerald-400 mb-2">
+                تعديل نتائج مباريات الذهاب:
+              </p>
+
+              {matches.map((match, index) => (
+                <div
+                  key={match.id}
+                  className="flex items-center justify-between gap-1 mb-2 bg-gray-900 p-2 rounded text-xs"
+                >
+                  <span className="w-16 truncate">
+                    {match.homeTeam}
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={match.homeGoals}
+                    onChange={(e) =>
+                      updateMatchScore(
+                        index,
+                        'homeGoals',
+                        e.target.value
+                      )
+                    }
+                    className="w-10 text-center bg-gray-800 text-white rounded p-1"
+                  />
+
+                  <span>-</span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={match.awayGoals}
+                    onChange={(e) =>
+                      updateMatchScore(
+                        index,
+                        'awayGoals',
+                        e.target.value
+                      )
+                    }
+                    className="w-10 text-center bg-gray-800 text-white rounded p-1"
+                  />
+
+                  <span className="w-16 truncate text-left">
+                    {match.awayTeam}
+                  </span>
+
+                  <button
+                    onClick={() => markMatchAsPlayed(index)}
+                    className="bg-blue-600 px-2 py-1 rounded text-white text-[10px]"
+                  >
+                    حفظ
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Main */}
+      <main className="p-4 max-w-md mx-auto">
+        {loading ? (
+          <div className="text-center py-10 text-gray-400 text-sm">
+            جاري تحميل البيانات...
+          </div>
+        ) : (
+          <>
+            {/* Matches */}
+            {activeTab === 'matches' && (
+              <div>
+                <h2 className="font-bold text-base mb-3 border-b pb-1">
+                  📅 جدول المباريات
+                </h2>
+
+                {matches.map((match) => (
+                  <div
+                    key={match.id}
+                    className={`p-3 mb-2 rounded shadow border text-sm ${
+                      darkMode
+                        ? 'bg-gray-800 border-gray-700'
+                        : 'bg-white border-gray-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center text-[10px] text-gray-400 mb-1">
+                      <span>المباراة #{match.id}</span>
+                      <span>{match.date}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center font-bold">
+                      <span>{match.homeTeam}</span>
+
+                      <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-xs">
+                        {match.played
+                          ? `${match.homeGoals} - ${match.awayGoals}`
+                          : 'VS'}
+                      </span>
+
+                      <span>{match.awayTeam}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Teams */}
+            {activeTab === 'teams' && (
+              <div>
+                <h2 className="font-bold text-base mb-3 border-b pb-1">
+                  🛡️ الفرق واللاعبين
+                </h2>
+
+                {teams.length === 0 ? (
+                  <div className="text-center text-gray-400 py-10">
+                    لا توجد بيانات للفرق
+                  </div>
+                ) : (
+                  teams.map((team, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 mb-3 rounded shadow border ${
+                        darkMode
+                          ? 'bg-gray-800 border-gray-700'
+                          : 'bg-white border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <img
+                          src={team.logo}
+                          alt={team.name}
+                          className="w-10 h-10 object-contain bg-black/20 rounded p-0.5"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+
+                        <h3 className="font-bold text-sm">
+                          {team.name}
+                        </h3>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-1 text-[11px]">
+                        {Array.isArray(team.players) &&
+                          team.players.map(
+                            (player, playerIndex) => (
+                              <div
+                                key={playerIndex}
+                                className={`p-1 rounded ${
+                                  darkMode
+                                    ? 'bg-gray-900'
+                                    : 'bg-gray-100'
+                                }`}
+                              >
+                                ⚽ {player}
+                              </div>
+                            )
+                          )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* News */}
+            {activeTab === 'news' && (
+              <div>
+                <h2 className="font-bold text-base mb-3 border-b pb-1">
+                  📰 الأخبار
+                </h2>
+
+                {news.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`p-3 mb-2 rounded shadow border ${
+                      darkMode
+                        ? 'bg-gray-800 border-gray-700'
+                        : 'bg-white border-gray-200'
+                    }`}
+                  >
+                    <h3 className="font-bold text-emerald-400 text-xs mb-1">
+                      {item.title}
+                    </h3>
+
+                    <p className="text-xs text-gray-300 mb-1">
+                      {item.content}
+                    </p>
+
+                    <span className="text-[10px] text-gray-500">
+                      {item.date}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+                      <div>
             <h1 className="font-bold text-sm">
               دوري ميدي للمحترفين
             </h1>
@@ -705,5 +946,114 @@ const [playerStats, setPlayerStats] = useState([]);
                                 alt={team.name}
                                 className="w-6 h-6 object-contain"
                                 onError={(e) => {
-                                  e.currentTarget.style.display =
-                       
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                              <span>{team.name}</span>
+                            </div>
+                          </td>
+
+                          <td className="p-2">
+                            {team.played}
+                          </td>
+
+                          <td className="p-2 text-emerald-400">
+                            {team.won}
+                          </td>
+
+                          <td className="p-2">
+                            {team.drawn}
+                          </td>
+
+                          <td className="p-2">
+                            {team.lost}
+                          </td>
+
+                          <td className="p-2">
+                            {team.goalsFor}
+                          </td>
+
+                          <td className="p-2">
+                            {team.goalsAgainst}
+                          </td>
+
+                          <td
+                            className={`p-2 font-bold ${
+                              team.goalDifference > 0
+                                ? 'text-emerald-400'
+                                : team.goalDifference < 0
+                                ? 'text-red-400'
+                                : ''
+                            }`}
+                          >
+                            {team.goalDifference > 0
+                              ? `+${team.goalDifference}`
+                              : team.goalDifference}
+                          </td>
+
+                          <td className="p-2 font-bold text-amber-400">
+                            {team.points}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </main>
+
+      {/* Bottom Navigation */}
+      <nav
+        className={`fixed bottom-0 left-0 right-0 border-t flex justify-around p-2 text-xs font-bold ${
+          darkMode
+            ? 'bg-gray-900 border-gray-800 text-gray-300'
+            : 'bg-white border-gray-200 text-gray-700'
+        }`}
+      >
+        <button
+          onClick={() => setActiveTab('matches')}
+          className={
+            activeTab === 'matches' ? 'text-emerald-500' : ''
+          }
+        >
+          📅 المباريات
+        </button>
+
+        <button
+          onClick={() => setActiveTab('standings')}
+          className={
+            activeTab === 'standings' ? 'text-emerald-500' : ''
+          }
+        >
+          🏆 الترتيب
+        </button>
+
+        <button
+          onClick={() => setActiveTab('news')}
+          className={
+            activeTab === 'news' ? 'text-emerald-500' : ''
+          }
+        >
+          📰 الأخبار
+        </button>
+
+        <button
+          onClick={() => setActiveTab('teams')}
+          className={
+            activeTab === 'teams' ? 'text-emerald-500' : ''
+          }
+        >
+          🛡️ الفرق
+        </button>
+      </nav>
+
+      {/* Footer */}
+      <footer className="text-center text-[10px] text-gray-500 py-10">
+        إعداد وتطوير: أيمن | دوري مديرية ميدي للمحترفين 2026
+      </footer>
+    </div>
+  );
+}
