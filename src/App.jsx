@@ -225,7 +225,12 @@ export default function MidiLeagueApp() {
       }
 
       if (data) {
-        if (Array.isArray(data.teams)) {
+        /*
+         * مهم:
+         * إذا كانت teams فارغة في Supabase لا نستبدل
+         * الفرق الموجودة داخل التطبيق بمصفوفة فارغة.
+         */
+        if (Array.isArray(data.teams) && data.teams.length > 0) {
           setTeams(data.teams);
         }
 
@@ -233,7 +238,7 @@ export default function MidiLeagueApp() {
           setMatches(data.matches);
         }
 
-        if (Array.isArray(data.news)) {
+        if (Array.isArray(data.news) && data.news.length > 0) {
           setNews(data.news);
         }
       }
@@ -291,6 +296,98 @@ export default function MidiLeagueApp() {
     setMatches(updatedMatches);
     saveData(updatedMatches);
   }
+
+  /*
+   * حساب جدول الترتيب تلقائياً
+   */
+  const standings = teams
+    .map((team) => ({
+      name: team.name,
+      logo: team.logo,
+      played: 0,
+      won: 0,
+      drawn: 0,
+      lost: 0,
+      goalsFor: 0,
+      goalsAgainst: 0,
+      goalDifference: 0,
+      points: 0
+    }))
+    .map((team) => {
+      const teamMatches = matches.filter(
+        (match) =>
+          match.played &&
+          (match.homeTeam === team.name ||
+            match.awayTeam === team.name)
+      );
+
+      const result = {
+        ...team,
+        played: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0
+      };
+
+      teamMatches.forEach((match) => {
+        const homeGoals = Number(match.homeGoals) || 0;
+        const awayGoals = Number(match.awayGoals) || 0;
+
+        result.played += 1;
+
+        if (match.homeTeam === team.name) {
+          result.goalsFor += homeGoals;
+          result.goalsAgainst += awayGoals;
+
+          if (homeGoals > awayGoals) {
+            result.won += 1;
+            result.points += 3;
+          } else if (homeGoals === awayGoals) {
+            result.drawn += 1;
+            result.points += 1;
+          } else {
+            result.lost += 1;
+          }
+        } else if (match.awayTeam === team.name) {
+          result.goalsFor += awayGoals;
+          result.goalsAgainst += homeGoals;
+
+          if (awayGoals > homeGoals) {
+            result.won += 1;
+            result.points += 3;
+          } else if (awayGoals === homeGoals) {
+            result.drawn += 1;
+            result.points += 1;
+          } else {
+            result.lost += 1;
+          }
+        }
+      });
+
+      result.goalDifference =
+        result.goalsFor - result.goalsAgainst;
+
+      return result;
+    })
+    .sort((a, b) => {
+      if (b.points !== a.points) {
+        return b.points - a.points;
+      }
+
+      if (b.goalDifference !== a.goalDifference) {
+        return b.goalDifference - a.goalDifference;
+      }
+
+      if (b.goalsFor !== a.goalsFor) {
+        return b.goalsFor - a.goalsFor;
+      }
+
+      return a.name.localeCompare(b.name, 'ar');
+    });
 
   return (
     <div
@@ -467,43 +564,55 @@ export default function MidiLeagueApp() {
                   🛡️ الفرق واللاعبين
                 </h2>
 
-                {teams.map((team, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 mb-3 rounded shadow border ${
-                      darkMode
-                        ? 'bg-gray-800 border-gray-700'
-                        : 'bg-white border-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <img
-                        src={team.logo}
-                        alt={team.name}
-                        className="w-8 h-8 object-contain bg-black/20 rounded p-0.5"
-                      />
-
-                      <h3 className="font-bold text-sm">
-                        {team.name}
-                      </h3>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-1 text-[11px]">
-                      {team.players.map((player, playerIndex) => (
-                        <div
-                          key={playerIndex}
-                          className={`p-1 rounded ${
-                            darkMode
-                              ? 'bg-gray-900'
-                              : 'bg-gray-100'
-                          }`}
-                        >
-                          ⚽ {player}
-                        </div>
-                      ))}
-                    </div>
+                {teams.length === 0 ? (
+                  <div className="text-center text-gray-400 py-10">
+                    لا توجد بيانات للفرق
                   </div>
-                ))}
+                ) : (
+                  teams.map((team, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 mb-3 rounded shadow border ${
+                        darkMode
+                          ? 'bg-gray-800 border-gray-700'
+                          : 'bg-white border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <img
+                          src={team.logo}
+                          alt={team.name}
+                          className="w-10 h-10 object-contain bg-black/20 rounded p-0.5"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+
+                        <h3 className="font-bold text-sm">
+                          {team.name}
+                        </h3>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-1 text-[11px]">
+                        {Array.isArray(team.players) &&
+                          team.players.map(
+                            (player, playerIndex) => (
+                              <div
+                                key={playerIndex}
+                                className={`p-1 rounded ${
+                                  darkMode
+                                    ? 'bg-gray-900'
+                                    : 'bg-gray-100'
+                                }`}
+                              >
+                                ⚽ {player}
+                              </div>
+                            )
+                          )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
 
@@ -547,70 +656,54 @@ export default function MidiLeagueApp() {
                 </h2>
 
                 <div
-                  className={`p-4 rounded shadow border text-center text-xs ${
+                  className={`rounded shadow border overflow-x-auto ${
                     darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-400'
-                      : 'bg-white border-gray-200 text-gray-500'
+                      ? 'bg-gray-800 border-gray-700'
+                      : 'bg-white border-gray-200'
                   }`}
                 >
-                  يتم احتساب وترتيب الفرق تلقائياً بناءً
-                  على نتائج المباريات المحفوظة.
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </main>
+                  <table className="w-full text-[10px] text-center">
+                    <thead
+                      className={
+                        darkMode
+                          ? 'bg-gray-900 text-emerald-400'
+                          : 'bg-gray-100 text-emerald-700'
+                      }
+                    >
+                      <tr>
+                        <th className="p-2">م</th>
+                        <th className="p-2 text-right">الفريق</th>
+                        <th className="p-2">ل</th>
+                        <th className="p-2">ف</th>
+                        <th className="p-2">ت</th>
+                        <th className="p-2">خ</th>
+                        <th className="p-2">له</th>
+                        <th className="p-2">عليه</th>
+                        <th className="p-2">+/-</th>
+                        <th className="p-2">ن</th>
+                      </tr>
+                    </thead>
 
-      {/* Bottom Navigation */}
-      <nav
-        className={`fixed bottom-0 left-0 right-0 border-t flex justify-around p-2 text-xs font-bold ${
-          darkMode
-            ? 'bg-gray-900 border-gray-800 text-gray-300'
-            : 'bg-white border-gray-200 text-gray-700'
-        }`}
-      >
-        <button
-          onClick={() => setActiveTab('matches')}
-          className={
-            activeTab === 'matches' ? 'text-emerald-500' : ''
-          }
-        >
-          📅 المباريات
-        </button>
+                    <tbody>
+                      {standings.map((team, index) => (
+                        <tr
+                          key={team.name}
+                          className={`border-t ${
+                            darkMode
+                              ? 'border-gray-700'
+                              : 'border-gray-200'
+                          }`}
+                        >
+                          <td className="p-2 font-bold">
+                            {index + 1}
+                          </td>
 
-        <button
-          onClick={() => setActiveTab('standings')}
-          className={
-            activeTab === 'standings' ? 'text-emerald-500' : ''
-          }
-        >
-          🏆 الترتيب
-        </button>
-
-        <button
-          onClick={() => setActiveTab('news')}
-          className={
-            activeTab === 'news' ? 'text-emerald-500' : ''
-          }
-        >
-          📰 الأخبار
-        </button>
-
-        <button
-          onClick={() => setActiveTab('teams')}
-          className={
-            activeTab === 'teams' ? 'text-emerald-500' : ''
-          }
-        >
-          🛡️ الفرق
-        </button>
-      </nav>
-
-      {/* Footer */}
-      <footer className="text-center text-[10px] text-gray-500 py-10">
-        إعداد وتطوير: أيمن | دوري مديرية ميدي للمحترفين 2026
-      </footer>
-    </div>
-  );
-}
+                          <td className="p-2 text-right">
+                            <div className="flex items-center gap-1 min-w-[90px]">
+                              <img
+                                src={team.logo}
+                                alt={team.name}
+                                className="w-6 h-6 object-contain"
+                                onError={(e) => {
+                                  e.currentTarget.style.display =
+                       
