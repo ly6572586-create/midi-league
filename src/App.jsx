@@ -15,11 +15,9 @@ export default function MidiLeagueApp() {
 
   const leagueLogo = 'https://i.postimg.cc/xC7qTMXK/IMG-20260829-232623.png';
 
-  // حالة إضافة خبر جديد من الإدارة
   const [newNewsTitle, setNewNewsTitle] = useState('');
   const [newNewsContent, setNewNewsContent] = useState('');
 
-  // حالة اختيار لاعب للتعديل عليه في الإدارة
   const [selectedTeamForPlayer, setSelectedTeamForPlayer] = useState('');
   const [selectedPlayerName, setSelectedPlayerName] = useState('');
 
@@ -74,13 +72,24 @@ export default function MidiLeagueApp() {
     }
   ]);
 
-  // قاعدة بيانات إحصائيات اللاعبين
-  const [playersStats, setPlayersStats] = useState([]);
+  // إضافة البيانات الأولية تلقائياً
+  const [playersStats, setPlayersStats] = useState([
+    { name: 'صديق محمد', team: 'الفرسان', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'محمد حسن جمال', team: 'الفرسان', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'علي محمد (حارس)', team: 'الفرسان', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'رياض خوري', team: 'الفرسان', goals: 0, yellowCards: 0, redCards: 1, bannedMatches: 1, missedMatches: 0 },
+    { name: 'طلال ابكر', team: 'المجد', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'محمد ناشف', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'عبده بلوش', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'ماهو متنبك', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'عبده الملك', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 }
+  ]);
 
+  // تحديث نتيجة مباراة الفرسان والمجد تلقائياً في الجدول
   const [matches, setMatches] = useState([
     { id: '1', date: '28 أغسطس 2026', homeTeam: 'الزعيم', awayTeam: 'الفرسان', homeGoals: 0, awayGoals: 0, played: false },
     { id: '2', date: '30 أغسطس 2026', homeTeam: 'المجد', awayTeam: 'الصقور', homeGoals: 0, awayGoals: 0, played: false },
-    { id: '3', date: '1 سبتمبر 2026', homeTeam: 'الفرسان', awayTeam: 'المجد', homeGoals: 0, awayGoals: 0, played: false },
+    { id: '3', date: '1 سبتمبر 2026', homeTeam: 'الفرسان', awayTeam: 'المجد', homeGoals: 3, awayGoals: 1, played: true },
     { id: '4', date: '3 سبتمبر 2026', homeTeam: 'الزعيم', awayTeam: 'الصقور', homeGoals: 0, awayGoals: 0, played: false },
     { id: '5', date: '5 سبتمبر 2026', homeTeam: 'الفرسان', awayTeam: 'الصقور', homeGoals: 0, awayGoals: 0, played: false },
     { id: '6', date: '7 سبتمبر 2026', homeTeam: 'الزعيم', awayTeam: 'المجد', homeGoals: 0, awayGoals: 0, played: false }
@@ -89,9 +98,9 @@ export default function MidiLeagueApp() {
   const [news, setNews] = useState([
     {
       id: '1',
-      title: 'انطلاق دوري ميدي للمحترفين 2026',
-      content: 'بحماس كبير انطلقت منافسات الدوري على ملعب بني فايد وسط حضور جماهيري غفير.',
-      date: '2026-08-28'
+      title: 'فوز مستحق للفرسان على المجد بنتيجة 3-1',
+      content: 'في مباراة مثيرة شهدت أهدافاً وقرارات تحكيمية حاسمة، تغلب فريق الفرسان على المجد بثلاثية مقابل هدف على ملعب بني فايد.',
+      date: '2026-09-01'
     }
   ]);
 
@@ -114,7 +123,7 @@ export default function MidiLeagueApp() {
         if (Array.isArray(data.teams) && data.teams.length > 0) setTeams(data.teams);
         if (Array.isArray(data.matches) && data.matches.length > 0) setMatches(data.matches);
         if (Array.isArray(data.news) && data.news.length > 0) setNews(data.news);
-        if (Array.isArray(data.playersStats)) setPlayersStats(data.playersStats);
+        if (Array.isArray(data.playersStats) && data.playersStats.length > 0) setPlayersStats(data.playersStats);
       }
     } catch (error) {
       console.log('Load error:', error);
@@ -160,7 +169,6 @@ export default function MidiLeagueApp() {
     saveData(updatedMatches, news, playersStats);
   }
 
-  // إضافة خبر جديد من الإدارة
   function handleAddNews() {
     if (!newNewsTitle.trim() || !newNewsContent.trim()) {
       alert('الرجاء كتابة العنوان والمحتوى');
@@ -179,7 +187,6 @@ export default function MidiLeagueApp() {
     saveData(matches, updatedNewsList, playersStats);
   }
 
-  // تحديث أو إنشاء إحصائية لاعب
   function handleUpdatePlayerStat(field, delta) {
     if (!selectedTeamForPlayer || !selectedPlayerName) {
       alert('يرجى اختيار الفريق واللاعب أولاً');
@@ -216,17 +223,14 @@ export default function MidiLeagueApp() {
     return foundTeam ? foundTeam.logo : '';
   };
 
-  // إيجاد إحصائيات اللاعب المحدد في الإدارة
   const selectedPlayerStat = playersStats.find(
     (p) => p.name === selectedPlayerName && p.team === selectedTeamForPlayer
   ) || { goals: 0, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 };
 
-  // قائمة الهدافين مرتبة
   const topScorers = [...playersStats]
     .filter((p) => p.goals > 0)
     .sort((a, b) => b.goals - a.goals);
 
-  // قائمة اللاعبين الموقوفين
   const suspendedPlayers = [...playersStats].filter(
     (p) => p.bannedMatches > p.missedMatches
   );
