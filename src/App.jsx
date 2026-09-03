@@ -72,23 +72,39 @@ export default function MidiLeagueApp() {
     }
   ]);
 
-  // إضافة البيانات الأولية تلقائياً
+  // الإحصائيات التراكمية لجميع المباريات الثلاث
   const [playersStats, setPlayersStats] = useState([
+    // الفرسان
+    { name: 'اصيل علي', team: 'الفرسان', goals: 2, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'محمد حسن جمال', team: 'الفرسان', goals: 2, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
     { name: 'صديق محمد', team: 'الفرسان', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
-    { name: 'محمد حسن جمال', team: 'الفرسان', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
-    { name: 'علي محمد (حارس)', team: 'الفرسان', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'علول محمد ابراهيم', team: 'الفرسان', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'عمار محمد علي', team: 'الفرسان', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
     { name: 'رياض خوري', team: 'الفرسان', goals: 0, yellowCards: 0, redCards: 1, bannedMatches: 1, missedMatches: 0 },
+
+    // الزعيم
+    { name: 'سلمان خالد', team: 'الزعيم', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'محمد قشه', team: 'الزعيم', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'تيسير', team: 'الزعيم', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'هاني (مدافع)', team: 'الزعيم', goals: 0, yellowCards: 0, redCards: 1, bannedMatches: 1, missedMatches: 0 },
+
+    // الصقور
+    { name: 'رمزي حرملي', team: 'الصقور', goals: 2, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'عبدالعزيز ابكر', team: 'الصقور', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+    { name: 'علي هادي', team: 'الصقور', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
+
+    // المجد
+    { name: 'عبده الملك', team: 'المجد', goals: 1, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
     { name: 'طلال ابكر', team: 'المجد', goals: 1, yellowCards: 0, redCards: 0, bannedMatches: 0, missedMatches: 0 },
     { name: 'محمد ناشف', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
     { name: 'عبده بلوش', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
-    { name: 'ماهو متنبك', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 },
-    { name: 'عبده الملك', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 }
+    { name: 'ماهو متنبك', team: 'المجد', goals: 0, yellowCards: 1, redCards: 0, bannedMatches: 0, missedMatches: 0 }
   ]);
 
-  // تحديث نتيجة مباراة الفرسان والمجد تلقائياً في الجدول
+  // تحديث جدول المباريات بالنتائج الفعلية
   const [matches, setMatches] = useState([
-    { id: '1', date: '28 أغسطس 2026', homeTeam: 'الزعيم', awayTeam: 'الفرسان', homeGoals: 0, awayGoals: 0, played: false },
-    { id: '2', date: '30 أغسطس 2026', homeTeam: 'المجد', awayTeam: 'الصقور', homeGoals: 0, awayGoals: 0, played: false },
+    { id: '1', date: '28 أغسطس 2026', homeTeam: 'الزعيم', awayTeam: 'الفرسان', homeGoals: 2, awayGoals: 3, played: true },
+    { id: '2', date: '30 أغسطس 2026', homeTeam: 'المجد', awayTeam: 'الصقور', homeGoals: 1, awayGoals: 3, played: true },
     { id: '3', date: '1 سبتمبر 2026', homeTeam: 'الفرسان', awayTeam: 'المجد', homeGoals: 3, awayGoals: 1, played: true },
     { id: '4', date: '3 سبتمبر 2026', homeTeam: 'الزعيم', awayTeam: 'الصقور', homeGoals: 0, awayGoals: 0, played: false },
     { id: '5', date: '5 سبتمبر 2026', homeTeam: 'الفرسان', awayTeam: 'الصقور', homeGoals: 0, awayGoals: 0, played: false },
@@ -98,9 +114,27 @@ export default function MidiLeagueApp() {
   const [news, setNews] = useState([
     {
       id: '1',
-      title: 'فوز مستحق للفرسان على المجد بنتيجة 3-1',
-      content: 'في مباراة مثيرة شهدت أهدافاً وقرارات تحكيمية حاسمة، تغلب فريق الفرسان على المجد بثلاثية مقابل هدف على ملعب بني فايد.',
-      date: '2026-09-01'
+      title: 'الفرسان يتصدر بثلاثية جديدة أمام المجد',
+      content: 'واصل فريق الفرسان انطلاقته القوية بفوزه بنتيجة 3-1 على المجد، بفضل أهداف صديق، محمد حسن، وعلول.',
+      date: '2026-09-01',
+      homeTeam: 'الفرسان',
+      awayTeam: 'المجد'
+    },
+    {
+      id: '2',
+      title: 'الصقور يحقق انتصاراً ثميناً على المجد',
+      content: 'تغلب فريق الصقور بنتيجة 3-1 على المجد بفضل ثنائية النجم رمزي وهدف عبدالعزيز ابكر.',
+      date: '2026-08-30',
+      homeTeam: 'المجد',
+      awayTeam: 'الصقور'
+    },
+    {
+      id: '3',
+      title: 'مباراة افتتاحية مثيرة تفوز بها الفرسان على الزعيم',
+      content: 'في قمة كروية حماسية انتهت بنتيجة 3-2، انتزع الفرسان الفوز بقيادة اصيل علي الذي سجل هدفين.',
+      date: '2026-08-28',
+      homeTeam: 'الزعيم',
+      awayTeam: 'الفرسان'
     }
   ]);
 
@@ -232,7 +266,7 @@ export default function MidiLeagueApp() {
     .sort((a, b) => b.goals - a.goals);
 
   const suspendedPlayers = [...playersStats].filter(
-    (p) => p.bannedMatches > p.missedMatches
+    (p) => p.bannedMatches > p.missedMatches || p.redCards > 0
   );
 
   const standings = teams
@@ -587,7 +621,7 @@ export default function MidiLeagueApp() {
                             </div>
                           </div>
                           <div className="text-right text-[10px] text-rose-300">
-                            <p className="font-bold">موقوف: {player.bannedMatches - player.missedMatches} مباراة</p>
+                            <p className="font-bold">موقوف: {Math.max(1, player.bannedMatches - player.missedMatches)} مباراة</p>
                             <p className="text-slate-400">🟨 {player.yellowCards} | 🟥 {player.redCards}</p>
                           </div>
                         </div>
@@ -683,7 +717,16 @@ export default function MidiLeagueApp() {
                 <h2 className="font-extrabold text-sm tracking-wide text-emerald-400 mb-3">📰 أحدث الأخبار والتغطيات</h2>
                 {news.map((item) => (
                   <div key={item.id} className={`p-4 rounded-2xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-                    <h3 className="font-bold text-emerald-400 text-xs mb-1.5">{item.title}</h3>
+                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-800/50">
+                      <h3 className="font-bold text-emerald-400 text-xs">{item.title}</h3>
+                      {item.homeTeam && item.awayTeam && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <img src={getTeamLogo(item.homeTeam)} alt={item.homeTeam} className="w-5 h-5 object-contain bg-slate-950 rounded p-0.5" />
+                          <span className="text-[9px] text-slate-500">VS</span>
+                          <img src={getTeamLogo(item.awayTeam)} alt={item.awayTeam} className="w-5 h-5 object-contain bg-slate-950 rounded p-0.5" />
+                        </div>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-300 leading-relaxed mb-2">{item.content}</p>
                     <div className="text-[10px] text-slate-500 flex items-center gap-1">
                       <span>🕒</span> {item.date}
